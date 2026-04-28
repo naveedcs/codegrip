@@ -1,0 +1,71 @@
+{
+  "rules": [
+    {
+      "id": "auth-change-requires-tests",
+      "title": "Auth flow changed",
+      "severity": "high",
+      "matchPaths": [
+        "**/*auth*",
+        "**/*session*",
+        "**/login/**"
+      ],
+      "message": "Authentication changes can affect login, reset, onboarding, and permissions.",
+      "suggestedAction": "Add or update regression tests for the changed auth flow.",
+      "requireTests": true
+    },
+    {
+      "id": "payment-or-billing-change",
+      "title": "Payment or billing code changed",
+      "severity": "critical",
+      "matchPaths": [
+        "**/*payment*",
+        "**/*billing*",
+        "**/*stripe*"
+      ],
+      "message": "Payment code has high user and business risk.",
+      "suggestedAction": "Check edge cases, rollback behavior, and relevant tests before landing.",
+      "requireTests": true
+    },
+    {
+      "id": "migration-change",
+      "title": "Migration changed",
+      "severity": "high",
+      "matchPaths": [
+        "**/migration/**",
+        "**/migrations/**",
+        "**/*schema*"
+      ],
+      "message": "Schema and migration changes can affect persisted data.",
+      "suggestedAction": "Confirm rollback notes and data compatibility.",
+      "requireTests": false
+    },
+    {
+      "id": "config-or-deploy-change",
+      "title": "Config or deployment changed",
+      "severity": "high",
+      "matchPaths": [
+        "**/*config*",
+        "**/deploy/**",
+        "**/infra/**",
+        "**/.github/workflows/**"
+      ],
+      "message": "Config and deployment changes can affect runtime behavior outside local tests.",
+      "suggestedAction": "Check environment-specific impact and deployment safety.",
+      "requireTests": false
+    },
+    {
+      "id": "shared-utility-change",
+      "title": "Shared utility changed",
+      "severity": "medium",
+      "matchPaths": [
+        "**/utils/**",
+        "**/helpers/**",
+        "**/shared/**",
+        "**/common/**"
+      ],
+      "message": "Shared code may have callers outside the visible task.",
+      "suggestedAction": "Search callers and run the closest related tests.",
+      "requireTests": false
+    }
+  ]
+}

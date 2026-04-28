@@ -1,0 +1,14 @@
+.vscode/**
+.vscode-test/**
+src/**
+!src/templates/**
+node_modules/**
+.eslintrc.json
+tsconfig.json
+*.map
+*.ts
+!out/**
+out/test/**
+!media/**
+!README.md
+!package.json

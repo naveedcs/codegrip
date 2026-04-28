@@ -1,0 +1,105 @@
+{
+  "rules": [
+    {
+      "id": "auth-change-requires-tests",
+      "title": "Auth flow changed",
+      "severity": "high",
+      "matchPaths": [
+        "**/*auth*",
+        "**/*session*",
+        "**/login/**"
+      ],
+      "message": "Authentication changes can affect login, reset, onboarding, and permissions.",
+      "suggestedAction": "Add or update regression tests for the changed auth flow.",
+      "requireTests": true
+    },
+    {
+      "id": "payment-or-billing-change",
+      "title": "Payment or billing code changed",
+      "severity": "critical",
+      "matchPaths": [
+        "**/*payment*",
+        "**/*billing*",
+        "**/*checkout*",
+        "**/*invoice*",
+        "**/*stripe*"
+      ],
+      "message": "Payment code has high user and business risk.",
+      "suggestedAction": "Check edge cases, rollback behavior, and relevant tests before landing.",
+      "requireTests": true
+    },
+    {
+      "id": "security-or-permission-change",
+      "title": "Security or permission code changed",
+      "severity": "critical",
+      "matchPaths": [
+        "**/*permission*",
+        "**/*policy*",
+        "**/*role*",
+        "**/*security*",
+        "**/*secret*",
+        "**/*token*"
+      ],
+      "message": "Security and permission changes can expose protected data or grant unintended access.",
+      "suggestedAction": "Review access boundaries and add focused authorization or security coverage.",
+      "requireTests": true
+    },
+    {
+      "id": "migration-change",
+      "title": "Migration changed",
+      "severity": "high",
+      "matchPaths": [
+        "**/migration/**",
+        "**/migrations/**",
+        "**/*schema*"
+      ],
+      "message": "Schema and migration changes can affect persisted data.",
+      "suggestedAction": "Confirm rollback notes and data compatibility.",
+      "requireTests": false
+    },
+    {
+      "id": "infrastructure-or-deploy-change",
+      "title": "Infrastructure or deployment changed",
+      "severity": "high",
+      "matchPaths": [
+        "**/deploy/**",
+        "**/deployment/**",
+        "**/infra/**",
+        "**/infrastructure/**",
+        "**/.github/workflows/**",
+        "**/Dockerfile",
+        "**/docker-compose*"
+      ],
+      "message": "Infrastructure and deployment changes can affect production behavior outside local tests.",
+      "suggestedAction": "Check environment-specific impact, rollback path, and deployment safety.",
+      "requireTests": false
+    },
+    {
+      "id": "configuration-change",
+      "title": "Configuration changed",
+      "severity": "high",
+      "matchPaths": [
+        "**/*config*",
+        "**/settings/**",
+        "**/.env*"
+      ],
+      "message": "Configuration changes can alter runtime behavior across environments.",
+      "suggestedAction": "Confirm local, staging, and production expectations before landing.",
+      "requireTests": false
+    },
+    {
+      "id": "shared-utility-change",
+      "title": "Shared utility changed",
+      "severity": "medium",
+      "matchPaths": [
+        "**/utils/**",
+        "**/helpers/**",
+        "**/shared/**",
+        "**/common/**"
+      ],
+      "message": "Shared code may have callers outside the visible task.",
+      "suggestedAction": "Search callers and run the closest related tests.",
+      "requireTests": false
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+node_modules/
+out/
+*.vsix
+.DS_Store
+.vscode-test/
+
+# Ignore Markdown files except the root README.
+*.md
+*.MD
+!/[Rr][Ee][Aa][Dd][Mm][Ee].[Mm][Dd]

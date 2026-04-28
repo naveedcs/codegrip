@@ -1,0 +1,8 @@
+---
+description: CodeGrip repo guidance for agentic edits
+alwaysApply: true
+---
+
+Read `.codegrip/agent-protocol.md`, `.codegrip/architecture.md`, and `.codegrip/conventions.md` when they are relevant to the current task.
+
+Keep edits scoped, preserve unrelated work, and follow existing repo patterns. Treat auth, permissions, payments, migrations, deployment, config, secrets, and shared utilities as higher-risk changes that need clear verification.

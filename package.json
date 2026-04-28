@@ -1,0 +1,96 @@
+{
+  "name": "codegrip",
+  "displayName": "CodeGrip",
+  "description": "A local-first VS Code companion that helps coding agents understand and review the system before changing it.",
+  "version": "0.0.1",
+  "publisher": "codegrip",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:codegrip.dashboard",
+    "onCommand:codegrip.initializeRepo",
+    "onCommand:codegrip.generatePrompt",
+    "onCommand:codegrip.reviewDiff",
+    "onCommand:codegrip.syncAgentRuleFiles",
+    "onCommand:codegrip.openDashboard",
+    "onCommand:codegrip.showPerformanceReport"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codegrip.initializeRepo",
+        "title": "CodeGrip: Initialize Repo",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.generatePrompt",
+        "title": "CodeGrip: Generate System-Aware Prompt",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.reviewDiff",
+        "title": "CodeGrip: Review Current Git Diff",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.syncAgentRuleFiles",
+        "title": "CodeGrip: Sync Agent Rule Files",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.openDashboard",
+        "title": "CodeGrip: Open Dashboard",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.showPerformanceReport",
+        "title": "CodeGrip: Show Performance Report",
+        "category": "CodeGrip"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codegrip",
+          "title": "CodeGrip",
+          "icon": "media/codegrip-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "codegrip": [
+        {
+          "id": "codegrip.dashboard",
+          "name": "Dashboard",
+          "type": "webview"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "npm run compile && node --test out/test",
+    "package": "vsce package"
+  },
+  "overrides": {
+    "cheerio": "1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/vscode": "^1.90.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "@vscode/vsce": "2.24.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.3"
+  }
+}
