@@ -24,6 +24,11 @@ export type DashboardMessage =
       readonly target?: string;
     }
   | {
+      readonly type: "openReviewDetails";
+      readonly task?: string;
+      readonly target?: string;
+    }
+  | {
       readonly type: "syncRules";
       readonly task?: string;
       readonly target?: string;

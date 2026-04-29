@@ -18,6 +18,10 @@
     "onCommand:codegrip.reviewDiff",
     "onCommand:codegrip.syncAgentRuleFiles",
     "onCommand:codegrip.openDashboard",
+    "onCommand:codegrip.openAgentProtocol",
+    "onCommand:codegrip.openReviewDetails",
+    "onCommand:codegrip.addDecisionLogEntry",
+    "onCommand:codegrip.markFindingAccepted",
     "onCommand:codegrip.showPerformanceReport"
   ],
   "main": "./out/extension.js",
@@ -46,6 +50,26 @@
       {
         "command": "codegrip.openDashboard",
         "title": "CodeGrip: Open Dashboard",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.openAgentProtocol",
+        "title": "CodeGrip: Open Agent Protocol",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.openReviewDetails",
+        "title": "CodeGrip: Open Review Details",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.addDecisionLogEntry",
+        "title": "CodeGrip: Add Decision Log Entry",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.markFindingAccepted",
+        "title": "CodeGrip: Mark Finding Accepted",
         "category": "CodeGrip"
       },
       {

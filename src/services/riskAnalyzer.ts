@@ -125,6 +125,7 @@ export function analyzeGitDiff(
       severity: "medium",
       title: "No tests changed",
       body: "Code files changed, but no test files were changed in the current diff.",
+      file: sourceFiles[0]?.path,
       whyItMatters:
         "Without a nearby test update, reviewers have less evidence that the changed behavior is covered.",
       suggestedAction:
@@ -138,6 +139,7 @@ export function analyzeGitDiff(
       severity: changedFiles.length >= 30 ? "high" : "medium",
       title: "Large diff",
       body: `${changedFiles.length} files changed in the current diff.`,
+      file: changedFiles[0]?.path,
       whyItMatters:
         "Large diffs are harder to review and can hide unrelated behavior changes.",
       suggestedAction:

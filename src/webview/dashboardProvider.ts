@@ -86,6 +86,10 @@ export class DashboardProvider implements WebviewViewProvider {
         };
         await this.render();
         return;
+      case "openReviewDetails":
+        await commands.executeCommand("codegrip.reviewDiff");
+        await commands.executeCommand("codegrip.openReviewDetails");
+        return;
       case "syncRules":
         await this.syncRulesFromDashboard();
         await this.render();

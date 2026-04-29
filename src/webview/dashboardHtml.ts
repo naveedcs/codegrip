@@ -258,6 +258,10 @@ export function getDashboardHtml(input: DashboardHtmlInput): string {
     .notice-error {
       border-left-color: var(--vscode-testing-iconFailed);
     }
+
+    .section-action {
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -305,6 +309,11 @@ export function getDashboardHtml(input: DashboardHtmlInput): string {
   <section>
     <h2>Current Diff Risk</h2>
     ${renderDiffRisk(state.diffRisk)}
+    ${
+      state.diffRisk.state === "reviewed"
+        ? '<button class="secondary section-action" data-action="openReviewDetails">Open Review Details</button>'
+        : ""
+    }
   </section>
 
   <section>
