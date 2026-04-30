@@ -2,6 +2,7 @@ import { readFile, stat } from "fs/promises";
 import * as path from "path";
 
 import { readCurrentGitDiff } from "./gitService";
+import { getCodeGripConfig } from "./configService";
 import { getAgentRuleFileStatuses } from "./syncService";
 import type { TemplateService } from "./templateService";
 import { getWorkspaceInfo } from "./workspaceService";
@@ -77,6 +78,7 @@ export async function buildDashboardState(
       fsPath: workspaceInfo.fsPath,
       isWritable: workspaceInfo.isWritable,
       isGitRepo: workspaceInfo.isGitRepo,
+      workspaceFolderCount: workspaceInfo.workspaceFolderCount,
       initialized
     },
     systemReadiness,
@@ -139,10 +141,13 @@ async function buildDiffRisk(
   workspaceRoot: string,
   templateService: TemplateService
 ): Promise<DashboardDiffRisk> {
+  const config = getCodeGripConfig();
   let snapshot: Awaited<ReturnType<typeof readCurrentGitDiff>>;
 
   try {
-    snapshot = await readCurrentGitDiff(workspaceRoot);
+    snapshot = await readCurrentGitDiff(workspaceRoot, {
+      maxDiffBytes: config.maxDiffBytes
+    });
   } catch (error) {
     return {
       state: "error",
@@ -166,13 +171,17 @@ async function buildDiffRisk(
       changedFileCount: 0,
       additions: 0,
       deletions: 0,
+      binaryFileCount: 0,
+      diffTruncated: false,
       topFindings: []
     };
   }
 
   try {
     const rules = await loadRiskRules(workspaceRoot, templateService);
-    const review = analyzeGitDiff(snapshot, rules);
+    const review = analyzeGitDiff(snapshot, rules, {
+      reviewStrictness: config.reviewStrictness
+    });
 
     return {
       state: "reviewed",
@@ -181,6 +190,8 @@ async function buildDiffRisk(
       changedFileCount: review.changedFileCount,
       additions: review.additions,
       deletions: review.deletions,
+      binaryFileCount: snapshot.binaryFileCount,
+      diffTruncated: snapshot.diffTruncated,
       testsChanged: review.testsChanged,
       matchingTestsChanged: review.matchingTestsChanged,
       findingCount: review.findings.length,
@@ -193,6 +204,8 @@ async function buildDiffRisk(
       changedFileCount: snapshot.changedFiles.length,
       additions: snapshot.additions,
       deletions: snapshot.deletions,
+      binaryFileCount: snapshot.binaryFileCount,
+      diffTruncated: snapshot.diffTruncated,
       topFindings: []
     };
   }

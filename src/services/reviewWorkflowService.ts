@@ -132,6 +132,8 @@ export function formatReviewDetails(review: LatestReview): string {
     `Reviewed: ${formatDateTime(review.reviewedAt)}`,
     `Risk: ${review.review.riskScore}`,
     `Changed files: ${review.review.changedFileCount} (+${review.review.additions} / -${review.review.deletions})`,
+    `Binary files changed: ${review.snapshot.binaryFileCount}`,
+    `Diff truncated: ${review.snapshot.diffTruncated ? "yes" : "no"}`,
     `Tests changed: ${review.review.testsChanged ? "yes" : "no"}`,
     `Matching tests changed: ${review.review.matchingTestsChanged ? "yes" : "no"}`,
     "",
@@ -157,7 +159,8 @@ function formatChangedFiles(review: GitDiffSnapshot): readonly string[] {
 
   return review.changedFiles.map((file) => {
     const testMarker = file.isTest ? " test" : "";
-    return `- ${file.path} (${file.status}, +${file.additions} / -${file.deletions}${testMarker})`;
+    const binaryMarker = file.isBinary ? " binary" : "";
+    return `- ${file.path} (${file.status}, +${file.additions} / -${file.deletions}${testMarker}${binaryMarker})`;
   });
 }
 

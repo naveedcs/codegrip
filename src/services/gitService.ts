@@ -13,11 +13,20 @@ type MutableChangedFile = {
   status: ChangedFileStatus;
   additions: number;
   deletions: number;
+  isBinary: boolean;
 };
 
+export type GitDiffReadOptions = {
+  readonly maxDiffBytes?: number;
+};
+
+const defaultMaxDiffBytes = 750_000;
+
 export async function readCurrentGitDiff(
-  workspaceRoot: string
+  workspaceRoot: string,
+  options: GitDiffReadOptions = {}
 ): Promise<GitDiffSnapshot> {
+  const maxDiffBytes = normalizeMaxDiffBytes(options.maxDiffBytes);
   const repoRoot = await detectGitRoot(workspaceRoot);
 
   if (!repoRoot) {
@@ -26,9 +35,13 @@ export async function readCurrentGitDiff(
       changedFiles: [],
       additions: 0,
       deletions: 0,
+      binaryFileCount: 0,
       unstagedDiff: "",
       stagedDiff: "",
-      combinedDiff: ""
+      combinedDiff: "",
+      diffBytes: 0,
+      diffTruncated: false,
+      maxDiffBytes
     };
   }
 
@@ -52,14 +65,19 @@ export async function readCurrentGitDiff(
         status: file.status,
         additions: file.additions,
         deletions: file.deletions,
-        isTest: isTestPath(file.path)
+        isTest: isTestPath(file.path),
+        isBinary: file.isBinary
       };
     })
     .sort((left, right) => left.path.localeCompare(right.path));
 
   const additions = changedFiles.reduce((total, file) => total + file.additions, 0);
   const deletions = changedFiles.reduce((total, file) => total + file.deletions, 0);
-  const combinedDiff = combineDiffs(unstagedDiff, stagedDiff);
+  const binaryFileCount = changedFiles.filter((file) => file.isBinary).length;
+  const combinedDiffResult = capDiffText(
+    combineDiffs(unstagedDiff, stagedDiff),
+    maxDiffBytes
+  );
 
   return {
     isGitRepo: true,
@@ -67,9 +85,13 @@ export async function readCurrentGitDiff(
     changedFiles,
     additions,
     deletions,
+    binaryFileCount,
     unstagedDiff,
     stagedDiff,
-    combinedDiff
+    combinedDiff: combinedDiffResult.content,
+    diffBytes: combinedDiffResult.originalBytes,
+    diffTruncated: combinedDiffResult.truncated,
+    maxDiffBytes
   };
 }
 
@@ -97,7 +119,8 @@ function parseStatus(statusOutput: string): Map<string, MutableChangedFile> {
       path: filePath,
       status: parseStatusCode(statusCode),
       additions: 0,
-      deletions: 0
+      deletions: 0,
+      isBinary: false
     });
   }
 
@@ -118,10 +141,12 @@ function applyNumstat(
     const existing = changedFiles.get(filePath);
     const additions = parseLineCount(additionsText);
     const deletions = parseLineCount(deletionsText);
+    const isBinary = additionsText === "-" || deletionsText === "-";
 
     if (existing) {
       existing.additions += additions;
       existing.deletions += deletions;
+      existing.isBinary = existing.isBinary || isBinary;
       continue;
     }
 
@@ -129,7 +154,8 @@ function applyNumstat(
       path: filePath,
       status: "modified",
       additions,
-      deletions
+      deletions,
+      isBinary
     });
   }
 }
@@ -193,6 +219,44 @@ function combineDiffs(unstagedDiff: string, stagedDiff: string): string {
   }
 
   return sections.join("\n\n");
+}
+
+function capDiffText(
+  content: string,
+  maxBytes: number
+): {
+  readonly content: string;
+  readonly originalBytes: number;
+  readonly truncated: boolean;
+} {
+  const originalBytes = Buffer.byteLength(content, "utf8");
+
+  if (originalBytes <= maxBytes) {
+    return {
+      content,
+      originalBytes,
+      truncated: false
+    };
+  }
+
+  const capped = Buffer.from(content, "utf8")
+    .subarray(0, maxBytes)
+    .toString("utf8")
+    .replace(/\uFFFD$/u, "");
+
+  return {
+    content: `${capped}\n\n[CodeGrip truncated diff text after ${maxBytes} bytes for local review.]`,
+    originalBytes,
+    truncated: true
+  };
+}
+
+function normalizeMaxDiffBytes(value: number | undefined): number {
+  if (!Number.isFinite(value) || value === undefined) {
+    return defaultMaxDiffBytes;
+  }
+
+  return Math.max(50_000, Math.min(Math.floor(value), 5_000_000));
 }
 
 function runGit(cwd: string, args: readonly string[]): Promise<string> {

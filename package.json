@@ -95,6 +95,40 @@
           "type": "webview"
         }
       ]
+    },
+    "configuration": {
+      "title": "CodeGrip",
+      "properties": {
+        "codegrip.defaultAgentTarget": {
+          "type": "string",
+          "enum": [
+            "Generic",
+            "Codex",
+            "Claude",
+            "Cursor",
+            "Copilot"
+          ],
+          "default": "Codex",
+          "description": "Default agent target used by CodeGrip prompt generation and the dashboard."
+        },
+        "codegrip.reviewStrictness": {
+          "type": "string",
+          "enum": [
+            "lenient",
+            "standard",
+            "strict"
+          ],
+          "default": "standard",
+          "description": "Controls how strongly CodeGrip scores deterministic review findings such as code changes without matching tests."
+        },
+        "codegrip.maxDiffBytes": {
+          "type": "number",
+          "default": 750000,
+          "minimum": 50000,
+          "maximum": 5000000,
+          "description": "Maximum current diff text, in bytes, that CodeGrip keeps for secret scanning and review details. Larger diffs are truncated with a warning finding."
+        }
+      }
     }
   },
   "scripts": {

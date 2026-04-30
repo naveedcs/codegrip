@@ -96,7 +96,8 @@ function createWorkspaceInfo(workspaceRoot: string): WorkspaceInfo {
     name: "test-workspace",
     fsPath: workspaceRoot,
     isWritable: true,
-    isGitRepo: true
+    isGitRepo: true,
+    workspaceFolderCount: 1
   };
 }
 

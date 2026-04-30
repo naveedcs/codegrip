@@ -2,6 +2,7 @@ import type { OutputChannel } from "vscode";
 import { commands, window } from "vscode";
 
 import type { CodeGripDiagnosticService } from "../services/diagnosticService";
+import { getCodeGripConfig } from "../services/configService";
 import type { PerformanceTracker } from "../services/performanceTracker";
 import { readCurrentGitDiff } from "../services/gitService";
 import {
@@ -31,10 +32,13 @@ export function registerReviewDiffCommand(
         return;
       }
 
+      const config = getCodeGripConfig();
       let snapshot: Awaited<ReturnType<typeof readCurrentGitDiff>>;
 
       try {
-        snapshot = await readCurrentGitDiff(workspaceInfo.fsPath);
+        snapshot = await readCurrentGitDiff(workspaceInfo.fsPath, {
+          maxDiffBytes: config.maxDiffBytes
+        });
       } catch (error) {
         const message = formatUnknownError(error);
         output.show(true);
@@ -76,7 +80,9 @@ export function registerReviewDiffCommand(
         return;
       }
 
-      const review = analyzeGitDiff(snapshot, rules);
+      const review = analyzeGitDiff(snapshot, rules, {
+        reviewStrictness: config.reviewStrictness
+      });
       writeRiskReviewSummary(output, snapshot, review);
       const diagnosticCount = diagnosticService.applyReview(
         workspaceInfo.fsPath,

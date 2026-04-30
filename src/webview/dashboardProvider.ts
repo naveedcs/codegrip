@@ -8,6 +8,7 @@ import {
   writeInitializeRepoSummary
 } from "../services/initializeRepoService";
 import { buildDashboardState } from "../services/dashboardStateService";
+import { getCodeGripConfig } from "../services/configService";
 import { PerformanceTracker } from "../services/performanceTracker";
 import type { AgentTarget } from "../services/promptBuilder";
 import { isAgentTarget } from "../services/promptBuilder";
@@ -24,7 +25,7 @@ export class DashboardProvider implements WebviewViewProvider {
   public static readonly viewType = "codegrip.dashboard";
 
   private currentTask = "";
-  private target: AgentTarget = "Codex";
+  private target: AgentTarget = getCodeGripConfig().defaultAgentTarget;
   private notice: DashboardNotice | undefined;
   private webviewView: WebviewView | undefined;
 

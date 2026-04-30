@@ -6,6 +6,7 @@ import {
   isPackageOrLockPath,
   normalizeRepoPath
 } from "./pathClassifier";
+import type { ReviewStrictness } from "./configService";
 import type { Finding, RiskSeverity } from "../types/findings";
 import type { ChangedFile, GitDiffSnapshot } from "../types/gitDiff";
 import type { RiskRule } from "../types/rules";
@@ -19,6 +20,10 @@ export type RiskReview = {
   readonly matchingTestsChanged: boolean;
   readonly findings: readonly Finding[];
   readonly suggestedChecks: readonly string[];
+};
+
+export type RiskReviewOptions = {
+  readonly reviewStrictness?: ReviewStrictness;
 };
 
 const severityRank: Record<RiskSeverity, number> = {
@@ -61,8 +66,10 @@ const genericPathTokens = new Set([
 
 export function analyzeGitDiff(
   snapshot: GitDiffSnapshot,
-  rules: readonly RiskRule[]
+  rules: readonly RiskRule[],
+  options: RiskReviewOptions = {}
 ): RiskReview {
+  const reviewStrictness = options.reviewStrictness ?? "standard";
   const changedFiles = snapshot.changedFiles;
   const testFiles = changedFiles.filter((file) => file.isTest);
   const sourceFiles = changedFiles.filter(
@@ -122,7 +129,7 @@ export function analyzeGitDiff(
   if (!docsOnly && sourceFiles.length > 0 && testFiles.length === 0) {
     findings.push({
       id: "code-change-without-tests",
-      severity: "medium",
+      severity: missingTestsSeverity(reviewStrictness),
       title: "No tests changed",
       body: "Code files changed, but no test files were changed in the current diff.",
       file: sourceFiles[0]?.path,
@@ -162,6 +169,35 @@ export function analyzeGitDiff(
         "Dependency and package metadata changes can affect install, build, runtime, or packaging behavior.",
       suggestedAction:
         "Run install/build verification and check that lockfile changes are expected."
+    });
+  }
+
+  const binaryFiles = changedFiles.filter((file) => file.isBinary);
+
+  if (binaryFiles.length > 0) {
+    findings.push({
+      id: "binary-file-change",
+      severity: "medium",
+      title: "Binary file changed",
+      body: `Changed ${formatFileCount(binaryFiles.length)}: ${formatFileList(binaryFiles)}.`,
+      file: binaryFiles[0]?.path,
+      whyItMatters:
+        "Binary files cannot be inspected from a text diff, so behavior or asset changes may be invisible in review.",
+      suggestedAction:
+        "Open the changed binary files and confirm the update is intentional."
+    });
+  }
+
+  if (snapshot.diffTruncated) {
+    findings.push({
+      id: "diff-truncated",
+      severity: reviewStrictness === "strict" ? "high" : "medium",
+      title: "Large diff text truncated",
+      body: `The diff is ${snapshot.diffBytes} bytes, above the configured ${snapshot.maxDiffBytes} byte review limit.`,
+      whyItMatters:
+        "CodeGrip may not scan every added line in very large diffs, including possible secret-like additions after the limit.",
+      suggestedAction:
+        "Split the change, raise codegrip.maxDiffBytes temporarily, or review the full Git diff manually."
     });
   }
 
@@ -213,6 +249,14 @@ export function writeRiskReviewSummary(
   output.appendLine(
     `Matching tests changed: ${review.matchingTestsChanged ? "yes" : "no"}`
   );
+  output.appendLine(`Binary files changed: ${snapshot.binaryFileCount}`);
+
+  if (snapshot.diffTruncated) {
+    output.appendLine(
+      `Diff text: truncated at ${snapshot.maxDiffBytes} bytes (${snapshot.diffBytes} bytes total)`
+    );
+  }
+
   output.appendLine("");
 
   if (snapshot.changedFiles.length > 0) {
@@ -220,8 +264,9 @@ export function writeRiskReviewSummary(
 
     for (const file of snapshot.changedFiles) {
       const testMarker = file.isTest ? " test" : "";
+      const binaryMarker = file.isBinary ? " binary" : "";
       output.appendLine(
-        `- ${file.path} (${file.status}, +${file.additions} / -${file.deletions}${testMarker})`
+        `- ${file.path} (${file.status}, +${file.additions} / -${file.deletions}${testMarker}${binaryMarker})`
       );
     }
 
@@ -354,6 +399,18 @@ function scoreFindings(findings: readonly Finding[]): RiskSeverity {
       ? finding.severity
       : highest;
   }, "low");
+}
+
+function missingTestsSeverity(strictness: ReviewStrictness): RiskSeverity {
+  if (strictness === "strict") {
+    return "high";
+  }
+
+  if (strictness === "lenient") {
+    return "low";
+  }
+
+  return "medium";
 }
 
 function buildSuggestedChecks(

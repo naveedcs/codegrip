@@ -8,3 +8,10 @@ out/
 *.md
 *.MD
 !/[Rr][Ee][Aa][Dd][Mm][Ee].[Mm][Dd]
+!/AGENTS.md
+!/CLAUDE.md
+!/CODEGRIP_PRODUCT_PLAN.md
+!/.codegrip/*.md
+!/.github/**/*.md
+!/docs/**/*.md
+!/src/templates/**/*.md

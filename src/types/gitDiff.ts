@@ -13,6 +13,7 @@ export type ChangedFile = {
   readonly additions: number;
   readonly deletions: number;
   readonly isTest: boolean;
+  readonly isBinary: boolean;
 };
 
 export type GitDiffSnapshot = {
@@ -21,7 +22,11 @@ export type GitDiffSnapshot = {
   readonly changedFiles: readonly ChangedFile[];
   readonly additions: number;
   readonly deletions: number;
+  readonly binaryFileCount: number;
   readonly unstagedDiff: string;
   readonly stagedDiff: string;
   readonly combinedDiff: string;
+  readonly diffBytes: number;
+  readonly diffTruncated: boolean;
+  readonly maxDiffBytes: number;
 };

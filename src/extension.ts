@@ -1,5 +1,6 @@
 import type { ExtensionContext } from "vscode";
-import { window } from "vscode";
+import * as path from "path";
+import { window, workspace } from "vscode";
 
 import { registerAddDecisionLogEntryCommand } from "./commands/addDecisionLogEntry";
 import { registerGeneratePromptCommand } from "./commands/generatePrompt";
@@ -41,6 +42,33 @@ export function activate(context: ExtensionContext): void {
       DashboardProvider.viewType,
       dashboardProvider
     ),
+    workspace.onDidChangeTextDocument((event) => {
+      if (event.document.uri.scheme !== "file") {
+        return;
+      }
+
+      const latestReview = reviewWorkflowService.getLatestReview();
+
+      if (!latestReview) {
+        return;
+      }
+
+      const relativePath = path.relative(
+        latestReview.workspaceRoot,
+        event.document.uri.fsPath
+      );
+      const isWorkspaceFile =
+        relativePath.length > 0 &&
+        !relativePath.startsWith("..") &&
+        !path.isAbsolute(relativePath);
+
+      if (!isWorkspaceFile) {
+        return;
+      }
+
+      diagnosticService.clear();
+      reviewWorkflowService.clearLatestReview();
+    }),
     diagnosticService,
     registerOpenDashboardCommand(performanceTracker),
     registerOpenAgentProtocolCommand(performanceTracker),

@@ -370,12 +370,16 @@ function renderWorkspaceHeader(state: DashboardState): string {
 
   const status = state.workspace.initialized ? "Initialized" : "Not initialized";
   const gitStatus = state.workspace.isGitRepo ? "Git detected" : "No Git metadata";
+  const workspaceNote =
+    state.workspace.workspaceFolderCount > 1
+      ? `Using active folder of ${state.workspace.workspaceFolderCount}. ${gitStatus}.`
+      : gitStatus;
 
   return `<div class="repo-row">
     <p class="subtle">Repo: ${escapeHtml(state.workspace.name)}</p>
     <span class="badge">${escapeHtml(status)}</span>
   </div>
-  <p class="subtle">${escapeHtml(gitStatus)}</p>`;
+  <p class="subtle">${escapeHtml(workspaceNote)}</p>`;
 }
 
 function renderNotice(notice: DashboardNotice | undefined): string {
@@ -424,6 +428,8 @@ function renderDiffRisk(diffRisk: DashboardDiffRisk): string {
           <span>${diffRisk.changedFileCount} files</span>
           <span>+${diffRisk.additions ?? 0}</span>
           <span>-${diffRisk.deletions ?? 0}</span>
+          ${renderNumericStat("Binary", diffRisk.binaryFileCount)}
+          ${renderBooleanStat("Truncated", diffRisk.diffTruncated)}
           ${renderBooleanStat("Tests", diffRisk.testsChanged)}
           ${renderBooleanStat("Matching", diffRisk.matchingTestsChanged)}
           ${renderFindingCount(diffRisk.findingCount)}
@@ -449,6 +455,14 @@ function renderBooleanStat(label: string, value: boolean | undefined): string {
   }
 
   return `<span>${escapeHtml(label)}: ${value ? "yes" : "no"}</span>`;
+}
+
+function renderNumericStat(label: string, value: number | undefined): string {
+  if (value === undefined || value === 0) {
+    return "";
+  }
+
+  return `<span>${escapeHtml(label)}: ${value}</span>`;
 }
 
 function renderFindingCount(value: number | undefined): string {

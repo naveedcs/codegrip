@@ -55,6 +55,8 @@ export type DashboardDiffRisk = {
   readonly changedFileCount?: number;
   readonly additions?: number;
   readonly deletions?: number;
+  readonly binaryFileCount?: number;
+  readonly diffTruncated?: boolean;
   readonly testsChanged?: boolean;
   readonly matchingTestsChanged?: boolean;
   readonly findingCount?: number;
@@ -69,6 +71,7 @@ export type DashboardState = {
     readonly fsPath: string;
     readonly isWritable: boolean;
     readonly isGitRepo: boolean;
+    readonly workspaceFolderCount: number;
     readonly initialized: boolean;
   };
   readonly systemReadiness: readonly DashboardChecklistItem[];

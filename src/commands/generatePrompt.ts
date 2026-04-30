@@ -2,6 +2,7 @@ import type { OutputChannel } from "vscode";
 import { commands, env, window, workspace } from "vscode";
 
 import type { PerformanceTracker } from "../services/performanceTracker";
+import { getCodeGripConfig } from "../services/configService";
 import {
   agentTargets,
   buildSystemAwarePrompt,
@@ -48,10 +49,14 @@ export function registerGeneratePromptCommand(
         return;
       }
 
-      const target = await window.showQuickPick([...agentTargets], {
-        placeHolder: "Choose the agent target for this prompt",
-        ignoreFocusOut: true
-      });
+      const config = getCodeGripConfig();
+      const target = await window.showQuickPick(
+        prioritizeTarget(config.defaultAgentTarget),
+        {
+          placeHolder: "Choose the agent target for this prompt",
+          ignoreFocusOut: true
+        }
+      );
 
       if (!target || !isAgentTarget(target)) {
         return;
@@ -111,4 +116,8 @@ export async function generatePromptFromTask(
 
 function formatUnknownError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function prioritizeTarget(target: AgentTarget): readonly AgentTarget[] {
+  return [target, ...agentTargets.filter((agentTarget) => agentTarget !== target)];
 }
