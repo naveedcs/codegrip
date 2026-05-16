@@ -1,6 +1,7 @@
 node_modules/
 out/
 *.vsix
+docs/
 .DS_Store
 .vscode-test/
 
@@ -14,5 +15,4 @@ out/
 !/tutorial.md
 !/.codegrip/*.md
 !/.github/**/*.md
-!/docs/**/*.md
 !/src/templates/**/*.md
