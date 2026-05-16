@@ -3,6 +3,8 @@ import * as path from "path";
 import { window, workspace } from "vscode";
 
 import { registerAddDecisionLogEntryCommand } from "./commands/addDecisionLogEntry";
+import { registerConfigureLlmReviewCommand } from "./commands/configureLlmReview";
+import { registerCreateTeamPolicyPackCommand } from "./commands/createTeamPolicyPack";
 import { registerGeneratePromptCommand } from "./commands/generatePrompt";
 import { registerInitializeRepoCommand } from "./commands/initializeRepo";
 import { registerMarkFindingAcceptedCommand } from "./commands/markFindingAccepted";
@@ -10,6 +12,7 @@ import { registerOpenAgentProtocolCommand } from "./commands/openAgentProtocol";
 import { registerOpenDashboardCommand } from "./commands/openDashboard";
 import { registerOpenReviewDetailsCommand } from "./commands/openReviewDetails";
 import { registerReviewDiffCommand } from "./commands/reviewDiff";
+import { registerReviewTerminalCommandCommand } from "./commands/reviewTerminalCommand";
 import { registerShowPerformanceReportCommand } from "./commands/showPerformanceReport";
 import { registerSyncRulesCommand } from "./commands/syncRules";
 import { CodeGripDiagnosticService } from "./services/diagnosticService";
@@ -89,6 +92,13 @@ export function activate(context: ExtensionContext): void {
       reviewWorkflowService
     ),
     registerAddDecisionLogEntryCommand(output, performanceTracker),
+    registerConfigureLlmReviewCommand(output, performanceTracker),
+    registerCreateTeamPolicyPackCommand(
+      output,
+      performanceTracker,
+      templateService
+    ),
+    registerReviewTerminalCommandCommand(output, performanceTracker),
     registerShowPerformanceReportCommand(performanceTracker)
   );
 

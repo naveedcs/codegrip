@@ -7,6 +7,8 @@ import { getAgentRuleFileStatuses } from "./syncService";
 import type { TemplateService } from "./templateService";
 import { getWorkspaceInfo } from "./workspaceService";
 import { analyzeGitDiff } from "./riskAnalyzer";
+import { buildRiskVisualization } from "./riskVisualizationService";
+import { buildReadinessAnalytics } from "./readinessAnalyticsService";
 import { loadRiskRules } from "./ruleService";
 import type { AgentTarget } from "./promptBuilder";
 import type {
@@ -68,6 +70,12 @@ export async function buildDashboardState(
     buildAgentFileStatus(workspaceInfo.fsPath, input.templateService),
     buildDiffRisk(workspaceInfo.fsPath, input.templateService)
   ]);
+  const readinessAnalytics = await buildReadinessAnalytics({
+    workspaceRoot: workspaceInfo.fsPath,
+    systemReadiness,
+    agentFiles,
+    diffRisk
+  });
   const initialized = systemReadiness.every((item) => item.status !== "missing");
 
   return {
@@ -84,6 +92,7 @@ export async function buildDashboardState(
     systemReadiness,
     diffRisk,
     agentFiles,
+    readinessAnalytics,
     notice: input.notice
   };
 }
@@ -195,7 +204,8 @@ async function buildDiffRisk(
       testsChanged: review.testsChanged,
       matchingTestsChanged: review.matchingTestsChanged,
       findingCount: review.findings.length,
-      topFindings: review.findings.slice(0, 3).map((finding) => finding.title)
+      topFindings: review.findings.slice(0, 3).map((finding) => finding.title),
+      visualization: buildRiskVisualization(snapshot, review)
     };
   } catch (error) {
     return {

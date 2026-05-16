@@ -18,7 +18,7 @@ test("initializeRepo creates core files and agent rule files", async () => {
     );
 
     assert.equal(result.workspaceName, "test-workspace");
-    assert.equal(result.files.length, 10);
+    assert.equal(result.files.length, 11);
     assert.ok(
       result.files.every((file) => file.status === "created"),
       "all initialization files should be created in a fresh workspace"
@@ -87,11 +87,13 @@ function createTemplateService(
     "architecture.md": "Architecture template",
     "conventions.md": "Conventions template",
     "risk-rules.json": "{\"rules\": []}",
+    "org-template.json": "{\"schemaVersion\": 1}",
     "decision-log.md": "Decision log template",
     "AGENTS.md": "Codex guidance",
     "CLAUDE.md": "Claude guidance",
     "cursor-rule.mdc": "Cursor guidance",
     "copilot-instructions.md": "Copilot guidance",
+    "llm-review-prompt.md": "LLM review prompt",
     ...overrides
   };
 

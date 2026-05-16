@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "organizationName": "Your organization",
+  "defaultAgentTarget": "Codex",
+  "reviewStrictness": "standard",
+  "requiredChecks": [
+    "Run focused tests for changed behavior.",
+    "Review risky path findings before landing.",
+    "Record accepted high-risk findings with context."
+  ],
+  "sensitivePaths": [
+    "auth",
+    "permissions",
+    "payments",
+    "migrations",
+    "deployment",
+    "config",
+    "secrets",
+    "shared utilities"
+  ],
+  "agentInstructions": [
+    "Inspect relevant files and likely callers before editing.",
+    "Keep changes small and preserve unrelated user edits.",
+    "Summarize files changed, tests run, and remaining risks."
+  ]
+}

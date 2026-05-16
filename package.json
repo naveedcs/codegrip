@@ -5,6 +5,21 @@
   "version": "0.0.1",
   "publisher": "codegrip",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/naveedcs/codegrip.git"
+  },
+  "bugs": {
+    "url": "https://github.com/naveedcs/codegrip/issues"
+  },
+  "homepage": "https://github.com/naveedcs/codegrip#readme",
+  "keywords": [
+    "ai",
+    "agents",
+    "code-review",
+    "prompt",
+    "risk-analysis"
+  ],
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -22,7 +37,10 @@
     "onCommand:codegrip.openReviewDetails",
     "onCommand:codegrip.addDecisionLogEntry",
     "onCommand:codegrip.markFindingAccepted",
-    "onCommand:codegrip.showPerformanceReport"
+    "onCommand:codegrip.showPerformanceReport",
+    "onCommand:codegrip.configureLlmReview",
+    "onCommand:codegrip.createTeamPolicyPack",
+    "onCommand:codegrip.reviewTerminalCommand"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -76,6 +94,21 @@
         "command": "codegrip.showPerformanceReport",
         "title": "CodeGrip: Show Performance Report",
         "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.configureLlmReview",
+        "title": "CodeGrip: Configure LLM Review",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.createTeamPolicyPack",
+        "title": "CodeGrip: Create Team Policy Pack",
+        "category": "CodeGrip"
+      },
+      {
+        "command": "codegrip.reviewTerminalCommand",
+        "title": "CodeGrip: Review Terminal Command",
+        "category": "CodeGrip"
       }
     ],
     "viewsContainers": {
@@ -127,6 +160,35 @@
           "minimum": 50000,
           "maximum": 5000000,
           "description": "Maximum current diff text, in bytes, that CodeGrip keeps for secret scanning and review details. Larger diffs are truncated with a warning finding."
+        },
+        "codegrip.llmReview.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enables optional LLM-powered review scaffolding. Disabled by default; CodeGrip does not make LLM calls unless this is enabled by the user."
+        },
+        "codegrip.llmReview.provider": {
+          "type": "string",
+          "enum": [
+            "local",
+            "remote"
+          ],
+          "default": "local",
+          "description": "Provider type to use when optional LLM-powered review is enabled."
+        },
+        "codegrip.llmReview.endpoint": {
+          "type": "string",
+          "default": "",
+          "description": "Optional local or remote endpoint for future LLM-powered review. CodeGrip does not call this endpoint while LLM review is disabled."
+        },
+        "codegrip.llmReview.model": {
+          "type": "string",
+          "default": "",
+          "description": "Optional model name for future LLM-powered review."
+        },
+        "codegrip.telemetry.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Reserved opt-in for future telemetry. Disabled by default; CodeGrip does not send telemetry in the current implementation."
         }
       }
     }

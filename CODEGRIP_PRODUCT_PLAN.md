@@ -1238,6 +1238,64 @@ Done when:
 - Public release requirements are explicit.
 - Known beta risks are documented with owners or next actions.
 
+### Sprint 9: Cinematic Risk Visualization
+
+Length:
+1 week.
+
+Goal:
+Give CodeGrip a distinctive visual review layer that makes diff risk, blast radius, and next actions legible at a glance without weakening the compact VS Code feel.
+
+Visual principles:
+
+- Every visual must be backed by deterministic CodeGrip review data.
+- Visuals should clarify findings, not replace textual explanations.
+- Use VS Code theme tokens and respect reduced-motion preferences.
+- Keep charts compact, keyboard-accessible, and screen-reader friendly.
+- Avoid decorative graphs that do not change the user's decision.
+
+Tasks:
+
+- Add a visualization data model derived from `GitDiffSnapshot`, `RiskReview`, changed files, findings, and suggested checks.
+- Add a Risk Storyboard: `Files touched -> Risk triggers -> Missing checks -> Suggested action`.
+- Add a Blast Radius Map showing changed files connected to risk zones such as auth, config, shared utilities, tests, docs, and deployment.
+- Add a Risk Heat Strip beside changed files using low, medium, high, and critical severity.
+- Add empty states for no diff, low-risk diff, and findings without file paths.
+- Keep the existing findings list visible as the source of truth.
+- Add tests for visualization data derivation.
+- Add manual dashboard checks for theme contrast, reduced motion, and keyboard navigation.
+
+Done when:
+
+- A user can understand the riskiest part of a diff within a few seconds.
+- The Blast Radius Map and Risk Storyboard match the textual findings.
+- The dashboard still feels like a native developer tool, not a marketing page.
+
+### Sprint 10: Readiness And Release Analytics
+
+Length:
+1 week.
+
+Goal:
+Turn repo readiness, terminal command risk, release readiness, and dogfooding feedback into local-first charts that help teams decide what to do next.
+
+Tasks:
+
+- Add an Agent Readiness Radar for protocol, architecture, conventions, risk rules, synced agent files, and test signal.
+- Add a Release Readiness Board for compile, lint, tests, VSIX packaging, smoke test, dogfooding, screenshots, license, and changelog.
+- Add a Command Danger Meter for `CodeGrip: Review Terminal Command`.
+- Add a local False Positive Trend view using accepted findings and dogfooding notes where available.
+- Add local-only chart summaries to review details or dashboard state without sending telemetry.
+- Add screenshot/demo updates that show the new visual analytics.
+- Document how teams should interpret readiness charts without treating them as hard gates.
+
+Done when:
+
+- Repo readiness and release state are visible without reading the full checklist.
+- Command risk has an immediate visual state and specific matched findings.
+- False-positive trends remain local, inspectable, and useful for rule tuning.
+- No analytics or chart data leaves the workspace.
+
 ### Sprint Backlog Rules
 
 - Keep each sprint shippable.
@@ -1245,3 +1303,4 @@ Done when:
 - Prioritize workflow speed over advanced configuration.
 - Prefer repo-local files over hidden extension state.
 - Treat false positives as product bugs, not just rule tuning.
+- Treat cinematic visuals as product comprehension tools, not decoration.

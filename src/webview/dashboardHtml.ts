@@ -244,6 +244,131 @@ export function getDashboardHtml(input: DashboardHtmlInput): string {
       padding-left: 16px;
     }
 
+    .visual-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .readiness-stack {
+      display: grid;
+      gap: 7px;
+    }
+
+    .pulse-row {
+      align-items: center;
+      display: grid;
+      gap: 7px;
+      grid-template-columns: 7px minmax(0, 1fr) minmax(72px, auto);
+      min-height: 22px;
+    }
+
+    .pulse-detail {
+      color: var(--vscode-descriptionForeground);
+      font-size: 11px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .storyboard {
+      display: grid;
+      gap: 6px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .story-step {
+      border-top: 3px solid var(--vscode-badge-background);
+      min-width: 0;
+      padding-top: 5px;
+    }
+
+    .story-step:not(.is-active) {
+      opacity: 0.55;
+    }
+
+    .visual-label,
+    .zone-label,
+    .heat-path {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .visual-label {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .visual-detail,
+    .zone-detail,
+    .heat-meta {
+      color: var(--vscode-descriptionForeground);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .blast-map {
+      display: grid;
+      gap: 6px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .blast-zone {
+      border-left: 3px solid var(--vscode-badge-background);
+      min-height: 38px;
+      opacity: 0.55;
+      padding-left: 7px;
+    }
+
+    .blast-zone.is-active {
+      opacity: 1;
+    }
+
+    .heat-strip {
+      display: grid;
+      gap: 5px;
+    }
+
+    .heat-file {
+      display: grid;
+      gap: 6px;
+      grid-template-columns: 5px minmax(0, 1fr) auto;
+      min-height: 24px;
+    }
+
+    .heat-bar {
+      background: var(--vscode-badge-background);
+      min-height: 24px;
+    }
+
+    .severity-low {
+      border-color: var(--vscode-testing-iconPassed);
+    }
+
+    .severity-medium {
+      border-color: var(--vscode-testing-iconQueued);
+    }
+
+    .severity-high,
+    .severity-critical {
+      border-color: var(--vscode-testing-iconFailed);
+    }
+
+    .fill-low {
+      background: var(--vscode-testing-iconPassed);
+    }
+
+    .fill-medium {
+      background: var(--vscode-testing-iconQueued);
+    }
+
+    .fill-high,
+    .fill-critical {
+      background: var(--vscode-testing-iconFailed);
+    }
+
     .notice {
       border-left: 3px solid var(--vscode-focusBorder);
       color: var(--vscode-foreground);
@@ -305,6 +430,15 @@ export function getDashboardHtml(input: DashboardHtmlInput): string {
     <h2>System Readiness</h2>
     ${renderChecklist(state.systemReadiness)}
   </section>
+
+  ${
+    state.readinessAnalytics
+      ? `<section>
+          <h2>Readiness Pulse</h2>
+          ${renderReadinessAnalytics(state.readinessAnalytics)}
+        </section>`
+      : ""
+  }
 
   <section>
     <h2>Current Diff Risk</h2>
@@ -417,6 +551,67 @@ function renderChecklistItem(item: DashboardChecklistItem): string {
   </div>`;
 }
 
+function renderReadinessAnalytics(
+  analytics: NonNullable<DashboardState["readinessAnalytics"]>
+): string {
+  const readyAgentSignals = countStatus(analytics.agentRadar, "ready");
+  const readyReleaseItems = countStatus(analytics.releaseBoard, "ready");
+  const falsePositiveCount =
+    analytics.falsePositiveTrend.acceptedFindingCount +
+    analytics.falsePositiveTrend.dogfoodingSignalCount +
+    analytics.falsePositiveTrend.loggedExampleCount;
+
+  return `<div class="readiness-stack" aria-label="Readiness analytics">
+    ${renderPulseRow(
+      "Agent readiness",
+      summarizeStatus(readyAgentSignals, analytics.agentRadar.length),
+      `${readyAgentSignals}/${analytics.agentRadar.length} signals ready`
+    )}
+    ${renderPulseRow(
+      "Release readiness",
+      summarizeStatus(readyReleaseItems, analytics.releaseBoard.length),
+      `${readyReleaseItems}/${analytics.releaseBoard.length} items ready`
+    )}
+    ${renderPulseRow(
+      "False positives",
+      analytics.falsePositiveTrend.status,
+      falsePositiveCount === 0
+        ? "No examples logged"
+        : `${falsePositiveCount} local signal${falsePositiveCount === 1 ? "" : "s"}`
+    )}
+  </div>`;
+}
+
+function renderPulseRow(
+  label: string,
+  status: NonNullable<DashboardState["readinessAnalytics"]>["falsePositiveTrend"]["status"],
+  detail: string
+): string {
+  return `<div class="pulse-row">
+    <span class="dot status-${statusClass(status)}"></span>
+    <span class="visual-label">${escapeHtml(label)}</span>
+    <span class="pulse-detail">${escapeHtml(detail)}</span>
+  </div>`;
+}
+
+function countStatus(
+  items: readonly { readonly status: string }[],
+  status: string
+): number {
+  return items.filter((item) => item.status === status).length;
+}
+
+function summarizeStatus(
+  readyCount: number,
+  totalCount: number
+): NonNullable<DashboardState["readinessAnalytics"]>["falsePositiveTrend"]["status"] {
+  if (totalCount > 0 && readyCount === totalCount) {
+    return "ready";
+  }
+
+  return readyCount === 0 ? "missing" : "warning";
+}
+
 function renderDiffRisk(diffRisk: DashboardDiffRisk): string {
   const badge = diffRisk.riskScore
     ? `<span class="risk-badge risk-${diffRisk.riskScore}">${escapeHtml(diffRisk.riskScore)}</span>`
@@ -440,13 +635,90 @@ function renderDiffRisk(diffRisk: DashboardDiffRisk): string {
       : `<ul class="findings">
           ${diffRisk.topFindings.map((finding) => `<li>${escapeHtml(finding)}</li>`).join("")}
         </ul>`;
+  const visualization = renderRiskVisualization(diffRisk);
 
   return `<div class="summary-row">
     <p class="subtle">${escapeHtml(diffRisk.message)}</p>
     ${badge}
   </div>
   ${stats}
+  ${visualization}
   ${findings}`;
+}
+
+function renderRiskVisualization(diffRisk: DashboardDiffRisk): string {
+  if (!diffRisk.visualization || diffRisk.state !== "reviewed") {
+    return "";
+  }
+
+  const visualization = diffRisk.visualization;
+
+  return `<div class="visual-stack" aria-label="Risk visualization">
+    ${renderRiskStoryboard(visualization.storyboard)}
+    ${renderBlastRadiusMap(visualization.blastRadius)}
+    ${renderHeatStrip(visualization.heatStrip)}
+  </div>`;
+}
+
+function renderRiskStoryboard(
+  storyboard: NonNullable<DashboardDiffRisk["visualization"]>["storyboard"]
+): string {
+  return `<div class="storyboard" aria-label="Risk storyboard">
+    ${storyboard
+      .map((step) => {
+        const activeClass = step.active ? " is-active" : "";
+        return `<div class="story-step severity-${step.severity}${activeClass}">
+          <div class="visual-label">${escapeHtml(step.label)}</div>
+          <div class="visual-detail">${escapeHtml(step.detail)}</div>
+        </div>`;
+      })
+      .join("")}
+  </div>`;
+}
+
+function renderBlastRadiusMap(
+  zones: NonNullable<DashboardDiffRisk["visualization"]>["blastRadius"]
+): string {
+  return `<div class="blast-map" aria-label="Blast radius map">
+    ${zones
+      .map((zone) => {
+        const activeClass = zone.active ? " is-active" : "";
+        return `<div class="blast-zone severity-${zone.severity}${activeClass}" title="${escapeHtml(zone.label)}">
+          <div class="zone-label">${escapeHtml(zone.label)}</div>
+          <div class="zone-detail">${zone.fileCount} files / ${zone.findingCount} findings</div>
+        </div>`;
+      })
+      .join("")}
+  </div>`;
+}
+
+function renderHeatStrip(
+  files: NonNullable<DashboardDiffRisk["visualization"]>["heatStrip"]
+): string {
+  if (files.length === 0) {
+    return '<p class="subtle">No changed files to map.</p>';
+  }
+
+  return `<div class="heat-strip" aria-label="Risk heat strip">
+    ${files
+      .map((file) => {
+        const markers = [
+          file.status,
+          `+${file.additions}`,
+          `-${file.deletions}`,
+          file.isTest ? "test" : "",
+          file.isBinary ? "binary" : ""
+        ]
+          .filter((marker) => marker.length > 0)
+          .join(" ");
+        return `<div class="heat-file" title="${escapeHtml(file.path)}">
+          <span class="heat-bar fill-${file.severity}"></span>
+          <span class="heat-path">${escapeHtml(file.path)}</span>
+          <span class="heat-meta">${escapeHtml(markers)}</span>
+        </div>`;
+      })
+      .join("")}
+  </div>`;
 }
 
 function renderBooleanStat(label: string, value: boolean | undefined): string {

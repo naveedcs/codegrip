@@ -19,6 +19,9 @@ Implemented so far:
 - `CodeGrip: Add Decision Log Entry`
 - `CodeGrip: Mark Finding Accepted`
 - `CodeGrip: Show Performance Report`
+- `CodeGrip: Configure LLM Review`
+- `CodeGrip: Create Team Policy Pack`
+- `CodeGrip: Review Terminal Command`
 - Local output channel named `CodeGrip`
 - Local-only command timing and activation timing
 - Repo initialization templates for `.codegrip/`, Codex, Claude, Cursor, and Copilot
@@ -27,6 +30,16 @@ Implemented so far:
 - Review detail documents for the latest diff review
 - Local decision log and accepted-finding history helpers
 - Workspace settings for default agent target, review strictness, and max diff text size
+- Optional LLM review settings that are disabled by default
+- Repo-local team policy pack scaffolding
+- Repo-local organization template defaults for team policy packs
+- Terminal command risk detection prototype that never executes commands
+- LLM review prompt template scaffolding for future review execution
+- JSON-ready audit log export format
+- Marketplace packaging metadata and release-readiness docs
+- Dashboard risk visuals: Risk Storyboard, Blast Radius Map, and Risk Heat Strip
+- Dashboard readiness pulse for agent readiness, release readiness, and false-positive signals
+- Terminal command danger meter for risky command review
 - Safer handling for multi-root workspaces, binary file changes, no-Git folders, and oversized diffs
 - Safe agent rule sync that preserves user-authored content outside CodeGrip-managed sections
 - Focused tests for initialization, prompt building, risk analysis, diagnostics, review workflow, risk rule validation, and agent rule sync
@@ -66,7 +79,12 @@ CodeGrip contributes these workspace settings:
 {
   "codegrip.defaultAgentTarget": "Codex",
   "codegrip.reviewStrictness": "standard",
-  "codegrip.maxDiffBytes": 750000
+  "codegrip.maxDiffBytes": 750000,
+  "codegrip.llmReview.enabled": false,
+  "codegrip.llmReview.provider": "local",
+  "codegrip.llmReview.endpoint": "",
+  "codegrip.llmReview.model": "",
+  "codegrip.telemetry.enabled": false
 }
 ```
 
@@ -74,14 +92,39 @@ CodeGrip contributes these workspace settings:
 
 `codegrip.maxDiffBytes` caps the diff text CodeGrip keeps for local review and secret scanning. When a diff is larger, CodeGrip truncates the stored diff text and adds a review finding.
 
+`codegrip.llmReview.*` settings reserve a future Pro configuration path. They are disabled by default. The current extension does not execute LLM-powered review or call the configured endpoint.
+
+`codegrip.telemetry.enabled` reserves a future opt-in telemetry path. It is disabled by default, and the current extension does not send telemetry.
+
+## Free And Pro Boundaries
+
+The local-first workflow remains the free foundation:
+
+- Repo initialization.
+- System-aware prompt generation.
+- Deterministic Git diff risk review.
+- Agent rule sync.
+- Problems diagnostics, review details, decision log entries, and accepted-finding history.
+
+Future Pro surfaces start behind explicit configuration:
+
+- Optional LLM-powered review.
+- Local or remote review provider settings.
+- Team policy packs.
+- Audit log export formats.
+
+CodeGrip should keep deterministic local review working even when Pro settings are disabled or incomplete.
+
 ## Privacy
 
 CodeGrip is local-first:
 
-- It does not call external LLMs.
+- It does not call external LLMs in the current implementation.
 - It does not send telemetry.
 - It reads local workspace files and Git diff output.
 - Generated prompts, reviews, decision log entries, and accepted findings stay in the local workspace.
+- Optional LLM review settings are stored as VS Code workspace settings and are disabled by default.
+- Optional telemetry settings are stored as VS Code workspace settings and are disabled by default.
 
 More detail lives in `docs/privacy.md`.
 
@@ -134,6 +177,7 @@ Generated files:
   architecture.md
   conventions.md
   risk-rules.json
+  org-template.json
   decision-log.md
   task-history/.gitkeep
 
@@ -178,6 +222,55 @@ In the Extension Development Host:
 3. Enter task, decision, reason, and verification text.
 4. Confirm the entry is appended to `.codegrip/decision-log.md`.
 
+## Testing Sprint 7 Pro Foundations
+
+In the Extension Development Host:
+
+1. Run `CodeGrip: Configure LLM Review`.
+2. Confirm `Show Current Configuration` prints disabled-by-default LLM review settings.
+3. Enable and disable LLM review, then confirm the workspace setting changes without running an LLM review.
+4. Run `CodeGrip: Create Team Policy Pack`.
+5. Enter a name and description.
+6. Confirm `.codegrip/team-policy-pack.json` opens and has `"llmReview": { "enabled": false }`.
+7. Run the command again and confirm the existing policy pack is not overwritten.
+
+## Testing Sprint 8 Release Readiness
+
+In the Extension Development Host:
+
+1. Run `CodeGrip: Review Terminal Command`.
+2. Enter `git status` and confirm CodeGrip reports low risk without executing the command.
+3. Enter `git reset --hard HEAD` and confirm CodeGrip reports critical risk.
+4. Run `CodeGrip: Initialize Repo` in a disposable workspace and confirm `.codegrip/org-template.json` is created.
+5. Edit `.codegrip/org-template.json`, then run `CodeGrip: Create Team Policy Pack`.
+6. Confirm the generated policy pack uses the org template policy defaults.
+7. In a multi-root workspace, open a file in the intended folder and confirm CodeGrip uses that active workspace; with no active editor, confirm it prefers an initialized `.codegrip/` folder.
+
+## Testing Sprint 9 Risk Visualization
+
+In the Extension Development Host:
+
+1. Open a Git repository with changes across a few risk zones, such as auth, shared utilities, tests, docs, config, or deployment files.
+2. Run `CodeGrip: Review Current Git Diff`.
+3. Open the CodeGrip dashboard.
+4. Confirm the Risk Storyboard shows files touched, risk triggers, missing checks, and suggested action stages.
+5. Confirm the Blast Radius Map highlights the expected risk zones.
+6. Confirm the Risk Heat Strip shows changed files and severity without hiding the existing findings list.
+7. Check light theme, dark theme, reduced-motion settings, and keyboard navigation.
+
+## Testing Sprint 10 Readiness Pulse
+
+In the Extension Development Host:
+
+1. Open a Git repository initialized with CodeGrip.
+2. Open the CodeGrip dashboard.
+3. Confirm the Readiness Pulse shows one compact row each for agent readiness, release readiness, and false positives.
+4. Record an accepted finding or dogfooding false-positive note, then refresh the dashboard and confirm the false-positive pulse updates.
+5. Confirm detailed release interpretation remains in local docs instead of expanding the sidebar by default.
+6. Run `CodeGrip: Review Terminal Command`.
+7. Enter `git status` and confirm the danger meter reports low risk.
+8. Enter `git reset --hard HEAD` and confirm the danger meter reports critical risk without executing the command.
+
 ## Testing Agent Rule Sync
 
 In the Extension Development Host:
@@ -198,3 +291,11 @@ No performance data leaves the machine.
 Use `docs/manual-extension-host-checklist.md` before sharing a fresh VSIX with early users.
 
 Screenshot placeholders and capture notes live in `docs/screenshots.md`.
+
+Release readiness docs:
+
+- `docs/ci.md`
+- `docs/demo-script.md`
+- `docs/release-checklist.md`
+- `docs/dogfooding.md`
+- `docs/false-positive-examples.md`

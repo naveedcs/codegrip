@@ -16,11 +16,13 @@ Run this checklist before sharing a fresh beta VSIX.
 - [ ] Open the CodeGrip activity bar item.
 - [ ] Confirm repo name, initialization status, Git status, readiness, diff risk, and agent file status render.
 - [ ] In a multi-root workspace, open a file in the intended folder and confirm CodeGrip uses that active folder.
+- [ ] In a multi-root workspace with no active editor, confirm CodeGrip prefers an initialized `.codegrip/` folder.
 
 ## Initialization And Sync
 
 - [ ] Run `CodeGrip: Initialize Repo`.
 - [ ] Confirm `.codegrip/` files are created.
+- [ ] Confirm `.codegrip/org-template.json` is created.
 - [ ] Confirm `AGENTS.md`, `CLAUDE.md`, Cursor rules, and Copilot instructions are created with managed sections.
 - [ ] Add custom text outside a managed section.
 - [ ] Run `CodeGrip: Sync Agent Rule Files`.
@@ -39,6 +41,11 @@ Run this checklist before sharing a fresh beta VSIX.
 - [ ] Change a normal source file without a test.
 - [ ] Run `CodeGrip: Review Current Git Diff`.
 - [ ] Confirm risk, findings, suggested checks, and Problems diagnostics appear.
+- [ ] Confirm the dashboard Risk Storyboard matches the review findings.
+- [ ] Confirm the dashboard Blast Radius Map highlights expected risk zones.
+- [ ] Confirm the dashboard Risk Heat Strip shows changed files and severity.
+- [ ] Confirm the textual findings list remains visible below the visuals.
+- [ ] Confirm the Readiness Pulse stays compact and reflects agent readiness, release readiness, and false-positive signals.
 - [ ] Run `CodeGrip: Open Review Details`.
 - [ ] Confirm the Markdown review includes changed files and suggested checks.
 - [ ] Edit a workspace file after review and confirm stale CodeGrip diagnostics clear.
@@ -52,6 +59,17 @@ Run this checklist before sharing a fresh beta VSIX.
 - [ ] Confirm `.codegrip/task-history/accepted-findings.md` is updated.
 - [ ] Run `CodeGrip: Add Decision Log Entry`.
 - [ ] Confirm `.codegrip/decision-log.md` is updated.
+
+## Pro And Release Readiness
+
+- [ ] Run `CodeGrip: Configure LLM Review`.
+- [ ] Confirm LLM review settings are disabled by default.
+- [ ] Run `CodeGrip: Create Team Policy Pack`.
+- [ ] Confirm `.codegrip/team-policy-pack.json` is created from `.codegrip/org-template.json`.
+- [ ] Run `CodeGrip: Review Terminal Command` with `git status` and confirm low risk.
+- [ ] Run `CodeGrip: Review Terminal Command` with `git reset --hard HEAD` and confirm critical risk without command execution.
+- [ ] Confirm terminal command review prints a danger meter with matched findings and suggested checks.
+- [ ] Confirm `codegrip.telemetry.enabled` exists and is disabled by default.
 
 ## Packaging
 

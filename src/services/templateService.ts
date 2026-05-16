@@ -7,11 +7,13 @@ export type TemplateName =
   | "architecture.md"
   | "conventions.md"
   | "risk-rules.json"
+  | "org-template.json"
   | "decision-log.md"
   | "AGENTS.md"
   | "CLAUDE.md"
   | "cursor-rule.mdc"
-  | "copilot-instructions.md";
+  | "copilot-instructions.md"
+  | "llm-review-prompt.md";
 
 export class TemplateService {
   public constructor(private readonly extensionUri: Uri) {}

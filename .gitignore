@@ -11,6 +11,7 @@ out/
 !/AGENTS.md
 !/CLAUDE.md
 !/CODEGRIP_PRODUCT_PLAN.md
+!/tutorial.md
 !/.codegrip/*.md
 !/.github/**/*.md
 !/docs/**/*.md

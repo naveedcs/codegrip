@@ -9,6 +9,8 @@ Capture these screenshots before a public beta README polish pass.
 - `media/screenshots/diff-review-output.png`: Output channel after a risky diff review.
 - `media/screenshots/problems-diagnostics.png`: VS Code Problems tab with CodeGrip findings.
 - `media/screenshots/review-details.png`: Review details Markdown document.
+- `media/screenshots/readiness-pulse.png`: Dashboard showing the compact Readiness Pulse.
+- `media/screenshots/terminal-command-danger-meter.png`: Output channel after reviewing a risky terminal command.
 
 ## Capture Notes
 

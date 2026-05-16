@@ -30,6 +30,10 @@ const coreFiles = [
     template: "risk-rules.json"
   },
   {
+    path: ".codegrip/org-template.json",
+    template: "org-template.json"
+  },
+  {
     path: ".codegrip/decision-log.md",
     template: "decision-log.md"
   }

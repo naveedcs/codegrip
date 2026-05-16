@@ -1,4 +1,6 @@
 import type { AgentTarget } from "../services/promptBuilder";
+import type { ReadinessAnalytics } from "../services/readinessAnalyticsService";
+import type { RiskVisualization } from "../services/riskVisualizationService";
 import type { RiskSeverity } from "../types/findings";
 
 export type DashboardMessage =
@@ -61,6 +63,7 @@ export type DashboardDiffRisk = {
   readonly matchingTestsChanged?: boolean;
   readonly findingCount?: number;
   readonly topFindings: readonly string[];
+  readonly visualization?: RiskVisualization;
 };
 
 export type DashboardState = {
@@ -77,5 +80,6 @@ export type DashboardState = {
   readonly systemReadiness: readonly DashboardChecklistItem[];
   readonly diffRisk: DashboardDiffRisk;
   readonly agentFiles: readonly DashboardChecklistItem[];
+  readonly readinessAnalytics?: ReadinessAnalytics;
   readonly notice?: DashboardNotice;
 };

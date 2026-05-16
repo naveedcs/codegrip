@@ -13,7 +13,7 @@ export type WorkspaceInfo = {
 };
 
 export async function getWorkspaceInfo(): Promise<WorkspaceInfo | undefined> {
-  const workspaceFolder = getPreferredWorkspaceFolder();
+  const workspaceFolder = await getPreferredWorkspaceFolder();
 
   if (!workspaceFolder) {
     return undefined;
@@ -30,7 +30,9 @@ export async function getWorkspaceInfo(): Promise<WorkspaceInfo | undefined> {
   };
 }
 
-function getPreferredWorkspaceFolder(): WorkspaceFolder | undefined {
+async function getPreferredWorkspaceFolder(): Promise<
+  WorkspaceFolder | undefined
+> {
   const activeDocument = window.activeTextEditor?.document;
 
   if (activeDocument) {
@@ -43,7 +45,20 @@ function getPreferredWorkspaceFolder(): WorkspaceFolder | undefined {
     }
   }
 
-  return workspace.workspaceFolders?.[0];
+  const workspaceFolders = workspace.workspaceFolders;
+
+  if (!workspaceFolders || workspaceFolders.length === 0) {
+    return undefined;
+  }
+
+  if (workspaceFolders.length === 1) {
+    return workspaceFolders[0];
+  }
+
+  return (
+    (await findInitializedWorkspaceFolder(workspaceFolders)) ??
+    workspaceFolders[0]
+  );
 }
 
 async function isWritableDirectory(fsPath: string): Promise<boolean> {
@@ -62,4 +77,19 @@ async function hasGitMetadata(fsPath: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function findInitializedWorkspaceFolder(
+  workspaceFolders: readonly WorkspaceFolder[]
+): Promise<WorkspaceFolder | undefined> {
+  for (const workspaceFolder of workspaceFolders) {
+    try {
+      await stat(path.join(workspaceFolder.uri.fsPath, ".codegrip"));
+      return workspaceFolder;
+    } catch {
+      continue;
+    }
+  }
+
+  return undefined;
 }

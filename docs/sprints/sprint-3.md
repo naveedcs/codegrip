@@ -1,7 +1,7 @@
 # Sprint 3 Report: Sidebar Dashboard MVP
 
 Status:
-In progress.
+Implementation complete. Release smoke testing is tracked in `task-tracker.md` under Release Closure.
 
 Duration:
 Started as the first sidebar workflow slice.
@@ -27,6 +27,7 @@ Move the core CodeGrip workflow into the sidebar so a user can operate the MVP w
 
 - `npm run compile`: passed.
 - `npm run lint`: passed.
+- Later VSIX package builds supersede the original Sprint 3 package checkpoint.
 
 ## Manual Test Checklist
 
@@ -41,7 +42,6 @@ Move the core CodeGrip workflow into the sidebar so a user can operate the MVP w
 
 ## Known Follow-Ups
 
-- Run the manual Extension Development Host smoke test.
-- Package a Sprint 3 VSIX.
+- Run the consolidated Release Closure Extension Development Host smoke test.
 - Add automated coverage around dashboard state construction.
 - Promote agent rule sync into a command in Sprint 4.
